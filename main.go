@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -9,39 +10,67 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/0xhexnumbers/partysim/mp1"
+	"github.com/0xhexnumbers/partysim/mp1/board"
 )
 
 func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
+	g := mp1.InitializeGame(board.LER, mp1.GameConfig{MaxTurns: 20})
+	g.Players[0].Char = "Mario"
+	g.Players[1].Char = "Luigi"
+	g.Players[2].Char = "Peach"
+	g.Players[3].Char = "Yoshi"
+
+	p0Stars := widget.NewLabel("")
+	p0Coins := widget.NewLabel("")
+	p1Stars := widget.NewLabel("")
+	p1Coins := widget.NewLabel("")
+	p2Stars := widget.NewLabel("")
+	p2Coins := widget.NewLabel("")
+	p3Stars := widget.NewLabel("")
+	p3Coins := widget.NewLabel("")
+	setText := func() {
+		p0Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[0].Stars))
+		p0Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[0].Coins))
+		p1Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[1].Stars))
+		p1Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[1].Coins))
+		p2Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[2].Stars))
+		p2Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[2].Coins))
+		p3Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[3].Stars))
+		p3Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[3].Coins))
+	}
+	setText()
+
 	collectablesPanel := container.New(
 		layout.NewVBoxLayout(),
 		container.New(
 			layout.NewHBoxLayout(),
-			canvas.NewText("Mario", color.White),
+			canvas.NewText(g.Players[0].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				canvas.NewText("Stars: 1", color.White),
-				canvas.NewText("Coins: 25", color.White),
+				p0Stars,
+				p0Coins,
 			),
-			canvas.NewText("Luigi", color.White),
+			canvas.NewText(g.Players[1].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				canvas.NewText("Stars: 0", color.White),
-				canvas.NewText("Coins: 42", color.White),
+				p1Stars,
+				p1Coins,
 			),
 		),
 		container.New(
 			layout.NewHBoxLayout(),
-			canvas.NewText("Peach", color.White),
+			canvas.NewText(g.Players[2].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				canvas.NewText("Stars: 2", color.White),
-				canvas.NewText("Coins: 0", color.White),
+				p2Stars,
+				p2Coins,
 			),
-			canvas.NewText("Yoshi", color.White),
+			canvas.NewText(g.Players[3].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				canvas.NewText("Stars: 1", color.White),
-				canvas.NewText("Coins: 5", color.White),
+				p3Stars,
+				p3Coins,
 			),
 		),
 	)
@@ -53,7 +82,14 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 	aiPanel := container.New(
 		layout.NewVBoxLayout(),
 		canvas.NewText("AI says 1, 2", color.White),
-		widget.NewButton("Run AI", func() { w.SetFullScreen(!w.FullScreen()) }),
+		widget.NewButton("Run AI", func() {
+			fmt.Println(g.Turn)
+			if g.NextEvent == nil {
+				return
+			}
+			g.HandleEvent(g.Responses()[0])
+			setText()
+		}),
 	)
 	panel := container.New(
 		layout.NewHBoxLayout(),
@@ -78,21 +114,7 @@ func main() {
 	uiApp := app.New()
 	window := uiApp.NewWindow("PartySim")
 
-	ui := makeAIUI(window, bmmImage)
+	ui := makeAIUI(window, lerImage)
 	window.SetContent(ui)
 	window.ShowAndRun()
-
-	/*uiApp := app.New()
-	w := uiApp.NewWindow("Test")
-	circ := lerSpaceToPos[makeChainSpace(0, 0)]  //newSpace(color.White, 0, 0, false)
-	circ2 := lerSpaceToPos[makeChainSpace(0, 1)] //newSpace(color.White, 100, 0, false)
-	circles := container.New(
-		&circlesLayout{},
-		circ,
-		circ2,
-	)
-	l := container.NewMax(lerImage.Image, circles)
-	w.SetContent(l)
-	w.ShowAndRun()*/
-
 }

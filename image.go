@@ -9,18 +9,19 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 	"github.com/0xhexnumbers/partysim/mp1"
+	"github.com/0xhexnumbers/partysim/mp1/board"
 )
 
 var (
 	imageSize        = fyne.NewSize(1200, 912)
-	ytiImage  *image = &image{board: mp1.YTI}
-	dkjaImage *image = &image{board: mp1.DKJA}
-	pbcImage  *image = &image{board: mp1.PBC}
-	wbcImage  *image = &image{board: mp1.WBC}
-	lerImage  *image = &image{board: mp1.LER}
-	mrcImage  *image = &image{board: mp1.MRC}
-	bmmImage  *image = &image{board: mp1.BMM}
-	esImage   *image = &image{board: mp1.ES}
+	ytiImage  *image = &image{board: board.YTI}
+	dkjaImage *image = &image{board: board.DKJA}
+	pbcImage  *image = &image{board: board.PBC}
+	wbcImage  *image = &image{board: board.WBC}
+	lerImage  *image = &image{board: board.LER}
+	mrcImage  *image = &image{board: board.MRC}
+	bmmImage  *image = &image{board: board.BMM}
+	esImage   *image = &image{board: board.ES}
 )
 
 type image struct {
