@@ -21,23 +21,15 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 	g.Players[2].Char = "Peach"
 	g.Players[3].Char = "Yoshi"
 
-	p0Stars := widget.NewLabel("")
-	p0Coins := widget.NewLabel("")
-	p1Stars := widget.NewLabel("")
-	p1Coins := widget.NewLabel("")
-	p2Stars := widget.NewLabel("")
-	p2Coins := widget.NewLabel("")
-	p3Stars := widget.NewLabel("")
-	p3Coins := widget.NewLabel("")
+	p0 := widget.NewLabel("")
+	p1 := widget.NewLabel("")
+	p2 := widget.NewLabel("")
+	p3 := widget.NewLabel("")
 	setText := func() {
-		p0Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[0].Stars))
-		p0Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[0].Coins))
-		p1Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[1].Stars))
-		p1Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[1].Coins))
-		p2Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[2].Stars))
-		p2Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[2].Coins))
-		p3Stars.SetText(fmt.Sprintf("Stars: %d", g.Players[3].Stars))
-		p3Coins.SetText(fmt.Sprintf("Coins: %d", g.Players[3].Coins))
+		p0.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[0].Stars, g.Players[0].Coins))
+		p1.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[1].Stars, g.Players[1].Coins))
+		p2.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[2].Stars, g.Players[2].Coins))
+		p3.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[3].Stars, g.Players[3].Coins))
 	}
 	setText()
 
@@ -48,14 +40,12 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 			canvas.NewText(g.Players[0].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				p0Stars,
-				p0Coins,
+				p0,
 			),
 			canvas.NewText(g.Players[1].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				p1Stars,
-				p1Coins,
+				p1,
 			),
 		),
 		container.New(
@@ -63,14 +53,12 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 			canvas.NewText(g.Players[2].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				p2Stars,
-				p2Coins,
+				p2,
 			),
 			canvas.NewText(g.Players[3].Char, color.White),
 			container.New(
 				layout.NewVBoxLayout(),
-				p3Stars,
-				p3Coins,
+				p3,
 			),
 		),
 	)
