@@ -87,9 +87,15 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 		layout.NewSpacer(),
 		aiPanel,
 	)
+	imgLayout := container.New(
+		layout.NewHBoxLayout(),
+		layout.NewSpacer(),
+		img,
+		layout.NewSpacer(),
+	)
 	ui := container.New(
 		layout.NewVBoxLayout(),
-		img,
+		imgLayout,
 		layout.NewSpacer(),
 		panel,
 	)
