@@ -12,8 +12,13 @@ import (
 	"github.com/0xhexnumbers/partysim/mp1/board"
 )
 
+const (
+	aspectRatio = 1.315789474
+	height      = 600
+)
+
 var (
-	imageSize        = fyne.NewSize(1200, 912)
+	imageSize        = fyne.NewSize(height*aspectRatio, height)
 	ytiImage  *image = &image{board: board.YTI}
 	dkjaImage *image = &image{board: board.DKJA}
 	pbcImage  *image = &image{board: board.PBC}

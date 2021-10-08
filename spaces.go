@@ -12,7 +12,7 @@ import (
 const (
 	highlightAlpha = 200
 	dormentAlpha   = 100
-	spaceLen       = 25
+	spaceLen       = 15
 )
 
 type spaceColor struct {
@@ -130,7 +130,7 @@ func (c *circlesLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 		o.Resize(spaceSize)
 		circ, ok := o.(*space)
 		if ok {
-			o.Move(circ.pos)
+			o.Move(fyne.NewPos(circ.pos.X*size.Width, circ.pos.Y*size.Height))
 		}
 	}
 }
