@@ -11,25 +11,31 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/0xhexnumbers/partysim/mp1"
-	"github.com/0xhexnumbers/partysim/mp1/board"
 )
 
 func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
-	g := mp1.InitializeGame(board.LER, mp1.GameConfig{MaxTurns: 20})
+	hideAllSpaces(img.spaceMap)
+
+	g := mp1.InitializeGame(img.board, mp1.GameConfig{MaxTurns: 20})
 	g.Players[0].Char = "Mario"
 	g.Players[1].Char = "Luigi"
 	g.Players[2].Char = "Peach"
 	g.Players[3].Char = "Yoshi"
 
+	gHandler := &GameHandler{Game: g}
+	img.spaceMap.setGameHandler(gHandler)
+
 	p0 := widget.NewLabel("")
 	p1 := widget.NewLabel("")
 	p2 := widget.NewLabel("")
 	p3 := widget.NewLabel("")
+	eventText := widget.NewLabel("")
 	setText := func() {
 		p0.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[0].Stars, g.Players[0].Coins))
 		p1.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[1].Stars, g.Players[1].Coins))
 		p2.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[2].Stars, g.Players[2].Coins))
 		p3.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[3].Stars, g.Players[3].Coins))
+		eventText.SetText(fmt.Sprintf("%T", g.NextEvent))
 	}
 	setText()
 
@@ -64,20 +70,34 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 	)
 	userPanel := container.New(
 		layout.NewVBoxLayout(),
-		canvas.NewText("Branch: Pick a space to go to?", color.White),
-		canvas.NewText("1, 2 | 2, 1", color.White),
+		eventText,
 	)
+	baseResponseContainer := container.New(layout.NewHBoxLayout(), createUserInputUI(gHandler, img.spaceMap))
 	aiPanel := container.New(
-		layout.NewVBoxLayout(),
-		canvas.NewText("AI says 1, 2", color.White),
-		widget.NewButton("Run AI", func() {
-			fmt.Println(g.Turn)
-			if g.NextEvent == nil {
-				return
-			}
-			g.HandleEvent(g.Responses()[0])
-			setText()
-		}),
+		layout.NewHBoxLayout(),
+		baseResponseContainer,
+		container.New(
+			layout.NewVBoxLayout(),
+			canvas.NewText("AI says 1, 2", color.White),
+			widget.NewButton("Continue with Selection", func() {
+				if g.NextEvent == nil {
+					return
+				}
+				//Execute Event
+				err := gHandler.HandleEvent()
+				if err != nil { //Tell user no response is selected
+					return
+				}
+
+				//Reset Space
+				hideAllSpaces(img.spaceMap)
+
+				//Update UI with data from new Event
+				setText()
+				baseResponseContainer.Objects[0] = createUserInputUI(gHandler, img.spaceMap)
+				baseResponseContainer.Refresh()
+			}),
+		),
 	)
 	panel := container.New(
 		layout.NewHBoxLayout(),

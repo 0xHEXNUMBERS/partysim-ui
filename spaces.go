@@ -2,11 +2,13 @@ package main
 
 import (
 	"image/color"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
+	"github.com/0xhexnumbers/partysim/mp1"
 )
 
 const (
@@ -56,16 +58,20 @@ var (
 
 type space struct {
 	widget.BaseWidget
-	circ *canvas.Circle
-	col  spaceColor
-	pos  fyne.Position
+	circ       *canvas.Circle
+	col        spaceColor
+	pos        fyne.Position
+	chainSpace mp1.ChainSpace
+	gHandler   *GameHandler
+	isSelected bool
 }
 
-func newSpace(col spaceColor, x, y float32) *space {
+func newSpace(col spaceColor, x, y float32, c, s int) *space {
 	space := &space{
-		circ: canvas.NewCircle(col.dorment),
-		col:  col,
-		pos:  fyne.NewPos(x, y),
+		circ:       canvas.NewCircle(col.dorment),
+		col:        col,
+		pos:        fyne.NewPos(x, y),
+		chainSpace: mp1.NewChainSpace(c, s),
 	}
 	space.circ.Resize(spaceSize)
 	space.circ.StrokeColor = color.Black
@@ -74,10 +80,21 @@ func newSpace(col spaceColor, x, y float32) *space {
 	return space
 }
 
-// MouseIn is a hook that is called if the mouse pointer enters the element.
-func (s *space) MouseIn(_ *desktop.MouseEvent) {
+func (s *space) highlight() {
 	s.circ.FillColor = s.col.highlight
 	s.circ.Refresh()
+}
+
+func (s *space) darken() {
+	if !s.isSelected { //Only darken if the space is not selected
+		s.circ.FillColor = s.col.dorment
+		s.circ.Refresh()
+	}
+}
+
+// MouseIn is a hook that is called if the mouse pointer enters the element.
+func (s *space) MouseIn(_ *desktop.MouseEvent) {
+	s.highlight()
 }
 
 // MouseMoved is a hook that is called if the mouse pointer moved over the element.
@@ -86,11 +103,14 @@ func (s *space) MouseMoved(_ *desktop.MouseEvent) {
 
 // MouseOut is a hook that is called if the mouse pointer leaves the element.
 func (s *space) MouseOut() {
-	s.circ.FillColor = s.col.dorment
-	s.circ.Refresh()
+	s.darken()
 }
 
-func (s *space) Tapped(_ *fyne.PointEvent) {
+//TODO: create selectSpace(*space/chainspace) func
+//will require either data stored in *space or package
+//scope.
+func (s *space) Tapped(p *fyne.PointEvent) {
+	s.gHandler.SetSpace(s)
 }
 
 func (s *space) CreateRenderer() fyne.WidgetRenderer {
@@ -139,4 +159,23 @@ func (c *circlesLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // CanvasObjects using this Layout algorithm.
 func (c *circlesLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return imageSize
+}
+
+func showSpace(spaceMap SpaceCirc, c mp1.ChainSpace) {
+	if circ, ok := spaceMap[c]; ok {
+		log.Printf("Showing circle at %#v", c)
+		circ.Show()
+	}
+}
+
+func hideSpace(spaceMap SpaceCirc, c mp1.ChainSpace) {
+	if circ, ok := spaceMap[c]; ok {
+		circ.Hide()
+	}
+}
+
+func hideAllSpaces(spaceMap SpaceCirc) {
+	for _, circ := range spaceMap {
+		circ.Hide()
+	}
 }
