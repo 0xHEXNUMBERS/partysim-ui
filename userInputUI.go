@@ -43,14 +43,14 @@ func createUserInputUI(g *GameHandler, spaceMap SpaceCirc) fyne.CanvasObject {
 			g.SetResponse(i)
 		})
 		return selection
-	case mp1.BOOLEAN_EVT_TYPE:
-		strs = []string{"yes", "no"}
+	case mp1.COIN_EVT_TYPE:
+		strs = make([]string, len(responses))
+		for i, r := range responses {
+			strs[i] = fmt.Sprintf("%d Coins", r)
+		}
 		selection := widget.NewSelect(strs, func(s string) {
-			if s == "yes" {
-				g.SetResponse(true)
-			} else {
-				g.SetResponse(false)
-			}
+			i, _ := strconv.Atoi(s)
+			g.SetResponse(i)
 		})
 		return selection
 	case mp1.PLAYER_EVT_TYPE:
