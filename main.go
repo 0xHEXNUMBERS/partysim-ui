@@ -35,7 +35,7 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 		p1.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[1].Stars, g.Players[1].Coins))
 		p2.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[2].Stars, g.Players[2].Coins))
 		p3.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[3].Stars, g.Players[3].Coins))
-		eventText.SetText(fmt.Sprintf("%T", g.NextEvent))
+		eventText.SetText(g.NextEvent.Question(g))
 	}
 	setText()
 
