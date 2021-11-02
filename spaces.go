@@ -82,13 +82,13 @@ func newSpace(col spaceColor, x, y float32, c, s int) *space {
 
 func (s *space) highlight() {
 	s.circ.FillColor = s.col.highlight
-	s.circ.Refresh()
+	s.Refresh()
 }
 
 func (s *space) darken() {
 	if !s.isSelected { //Only darken if the space is not selected
 		s.circ.FillColor = s.col.dorment
-		s.circ.Refresh()
+		s.Refresh()
 	}
 }
 
@@ -139,6 +139,7 @@ func (s *space) Objects() []fyne.CanvasObject {
 // Refresh is a hook that is called if the widget has updated and needs to be redrawn.
 // This might trigger a Layout.
 func (s *space) Refresh() {
+	s.circ.Refresh()
 }
 
 type circlesLayout struct{}
