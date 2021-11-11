@@ -171,11 +171,13 @@ func showSpace(spaceMap SpaceCirc, c mp1.ChainSpace) {
 
 func hideSpace(spaceMap SpaceCirc, c mp1.ChainSpace) {
 	if circ, ok := spaceMap[c]; ok {
+		log.Printf("Hiding circle at %#v", c)
 		circ.Hide()
 	}
 }
 
 func hideAllSpaces(spaceMap SpaceCirc) {
+	log.Printf("Hiding all circles")
 	for _, circ := range spaceMap {
 		circ.Hide()
 	}
