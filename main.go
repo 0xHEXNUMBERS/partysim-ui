@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -25,16 +24,16 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 	gHandler := &GameHandler{Game: g}
 	img.spaceMap.setGameHandler(gHandler)
 
-	p0 := widget.NewLabel("")
-	p1 := widget.NewLabel("")
-	p2 := widget.NewLabel("")
-	p3 := widget.NewLabel("")
+	p0 := NewPlayer(g, 0)
+	p1 := NewPlayer(g, 1)
+	p2 := NewPlayer(g, 2)
+	p3 := NewPlayer(g, 3)
 	eventText := widget.NewLabel("")
 	setText := func() {
-		p0.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[0].Stars, g.Players[0].Coins))
-		p1.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[1].Stars, g.Players[1].Coins))
-		p2.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[2].Stars, g.Players[2].Coins))
-		p3.SetText(fmt.Sprintf("Stars: %d\nCoins: %d", g.Players[3].Stars, g.Players[3].Coins))
+		p0.Refresh()
+		p1.Refresh()
+		p2.Refresh()
+		p3.Refresh()
 		eventText.SetText(g.NextEvent.Question(g))
 	}
 	setText()
@@ -43,29 +42,13 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 		layout.NewVBoxLayout(),
 		container.New(
 			layout.NewHBoxLayout(),
-			canvas.NewText(g.Players[0].Char, color.White),
-			container.New(
-				layout.NewVBoxLayout(),
-				p0,
-			),
-			canvas.NewText(g.Players[1].Char, color.White),
-			container.New(
-				layout.NewVBoxLayout(),
-				p1,
-			),
+			p0,
+			p1,
 		),
 		container.New(
 			layout.NewHBoxLayout(),
-			canvas.NewText(g.Players[2].Char, color.White),
-			container.New(
-				layout.NewVBoxLayout(),
-				p2,
-			),
-			canvas.NewText(g.Players[3].Char, color.White),
-			container.New(
-				layout.NewVBoxLayout(),
-				p3,
-			),
+			p2,
+			p3,
 		),
 	)
 	userPanel := container.New(
