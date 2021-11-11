@@ -34,7 +34,6 @@ type image struct {
 	image    *canvas.Image
 	spaceMap SpaceCirc
 	circles  *fyne.Container
-	curSpace mp1.ChainSpace
 	board    mp1.Board
 }
 
