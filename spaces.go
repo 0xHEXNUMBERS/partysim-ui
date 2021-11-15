@@ -106,11 +106,13 @@ func (s *space) MouseOut() {
 	s.darken()
 }
 
-//TODO: create selectSpace(*space/chainspace) func
-//will require either data stored in *space or package
-//scope.
 func (s *space) Tapped(p *fyne.PointEvent) {
-	s.gHandler.SetSpace(s)
+	if s.gHandler != nil {
+		log.Println("space.Tapped: Asking controller to set space")
+		s.gHandler.SetSpace(s)
+		return
+	}
+	log.Println("space.Tapped: s.gHanlder is nil, must be player space")
 }
 
 func (s *space) CreateRenderer() fyne.WidgetRenderer {
@@ -160,25 +162,4 @@ func (c *circlesLayout) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 // CanvasObjects using this Layout algorithm.
 func (c *circlesLayout) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return imageSize
-}
-
-func showSpace(spaceMap SpaceCirc, c mp1.ChainSpace) {
-	if circ, ok := spaceMap[c]; ok {
-		log.Printf("Showing circle at %#v", c)
-		circ.Show()
-	}
-}
-
-func hideSpace(spaceMap SpaceCirc, c mp1.ChainSpace) {
-	if circ, ok := spaceMap[c]; ok {
-		log.Printf("Hiding circle at %#v", c)
-		circ.Hide()
-	}
-}
-
-func hideAllSpaces(spaceMap SpaceCirc) {
-	log.Printf("Hiding all circles")
-	for _, circ := range spaceMap {
-		circ.Hide()
-	}
 }

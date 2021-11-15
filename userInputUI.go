@@ -95,10 +95,11 @@ func createUserInputUI(g *GameHandler, spaceMap SpaceCirc) fyne.CanvasObject {
 		})
 		return selection
 	case mp1.CHAINSPACE_EVT_TYPE:
-		for _, res := range responses {
-			cs := res.(mp1.ChainSpace)
-			showSpace(spaceMap, cs)
+		chainspaces := make([]mp1.ChainSpace, len(responses))
+		for i, res := range responses {
+			chainspaces[i] = res.(mp1.ChainSpace)
 		}
+		g.Controller.SetNormalCircs(chainspaces)
 	}
 
 	return widget.NewLabel("Nothing to put here")

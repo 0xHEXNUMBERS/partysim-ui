@@ -18,71 +18,75 @@ const (
 )
 
 var (
-	imageSize        = fyne.NewSize(height*aspectRatio, height)
-	ytiImage  *image = &image{board: board.YTI}
-	dkjaImage *image = &image{board: board.DKJA}
-	pbcImage  *image = &image{board: board.PBC}
-	wbcImage  *image = &image{board: board.WBC}
-	lerImage  *image = &image{board: board.LER}
-	mrcImage  *image = &image{board: board.MRC}
-	bmmImage  *image = &image{board: board.BMM}
-	esImage   *image = &image{board: board.ES}
+	imageSize              = fyne.NewSize(height*aspectRatio, height)
+	ytiImage  *boardWidget = &boardWidget{board: board.YTI}
+	dkjaImage *boardWidget = &boardWidget{board: board.DKJA}
+	pbcImage  *boardWidget = &boardWidget{board: board.PBC}
+	wbcImage  *boardWidget = &boardWidget{board: board.WBC}
+	lerImage  *boardWidget = &boardWidget{board: board.LER}
+	mrcImage  *boardWidget = &boardWidget{board: board.MRC}
+	bmmImage  *boardWidget = &boardWidget{board: board.BMM}
+	esImage   *boardWidget = &boardWidget{board: board.ES}
 )
 
-type image struct {
+type boardWidget struct {
 	widget.BaseWidget
-	image    *canvas.Image
-	spaceMap SpaceCirc
-	circles  *fyne.Container
-	board    mp1.Board
+	image         *canvas.Image
+	spaceMap      SpaceCirc
+	circles       *fyne.Container
+	playerCircles [4]*space
+	board         mp1.Board
 }
 
 // MouseIn is a hook that is called if the mouse pointer enters the element.
-func (i *image) MouseIn(_ *desktop.MouseEvent) {
+func (i *boardWidget) MouseIn(_ *desktop.MouseEvent) {
 }
 
 // MouseMoved is a hook that is called if the mouse pointer moved over the element.
-func (i *image) MouseMoved(m *desktop.MouseEvent) {
+func (i *boardWidget) MouseMoved(m *desktop.MouseEvent) {
 }
 
 // MouseOut is a hook that is called if the mouse pointer leaves the element.
-func (i *image) MouseOut() {
+func (i *boardWidget) MouseOut() {
 }
 
-func (i *image) Tapped(p *fyne.PointEvent) {
+func (i *boardWidget) Tapped(p *fyne.PointEvent) {
 }
 
-func (i *image) CreateRenderer() fyne.WidgetRenderer {
-	return imageRenderer{i}
+func (i *boardWidget) CreateRenderer() fyne.WidgetRenderer {
+	return boardRenderer{i}
 }
 
-type imageRenderer struct {
-	img *image
+type boardRenderer struct {
+	img *boardWidget
 }
 
 // Destroy is for internal use.
-func (i imageRenderer) Destroy() {
+func (i boardRenderer) Destroy() {
 }
 
 // Layout is a hook that is called if the widget needs to be laid out.
 // This should never call Refresh.
-func (i imageRenderer) Layout(s fyne.Size) {
+func (i boardRenderer) Layout(s fyne.Size) {
 	i.img.image.Resize(imageSize)
 }
 
 // MinSize returns the minimum size of the widget that is rendered by this renderer.
-func (i imageRenderer) MinSize() fyne.Size {
+func (i boardRenderer) MinSize() fyne.Size {
 	return imageSize
 }
 
 // Objects returns all objects that should be drawn.
-func (i imageRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{i.img.image, i.img.circles}
+func (i boardRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{
+		i.img.image,
+		i.img.circles,
+	}
 }
 
 // Refresh is a hook that is called if the widget has updated and needs to be redrawn.
 // This might trigger a Layout.
-func (i imageRenderer) Refresh() {
+func (i boardRenderer) Refresh() {
 }
 
 type imageLoader struct {
@@ -102,7 +106,7 @@ func (i *imageLoader) loadImage(filePath string) (img *canvas.Image) {
 	return
 }
 
-func (i imageLoader) initImage(img *image, filePath string, spaceMap SpaceCirc) {
+func (i imageLoader) initImage(img *boardWidget, filePath string, spaceMap SpaceCirc) {
 	if i.err != nil {
 		return
 	}
@@ -115,6 +119,14 @@ func (i imageLoader) initImage(img *image, filePath string, spaceMap SpaceCirc) 
 			circs.Add(circle)
 		}
 	}
+	img.playerCircles[0] = newSpace(scPlayer1Colors, 0, 0, 0, 0)
+	img.playerCircles[1] = newSpace(scPlayer2Colors, 0, 0, 0, 0)
+	img.playerCircles[2] = newSpace(scPlayer3Colors, 0, 0, 0, 0)
+	img.playerCircles[3] = newSpace(scPlayer4Colors, 0, 0, 0, 0)
+	circs.Add(img.playerCircles[0])
+	circs.Add(img.playerCircles[1])
+	circs.Add(img.playerCircles[2])
+	circs.Add(img.playerCircles[3])
 	img.circles = circs
 }
 

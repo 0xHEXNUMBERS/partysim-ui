@@ -12,22 +12,30 @@ import (
 	"github.com/0xhexnumbers/partysim/mp1"
 )
 
-func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
-	hideAllSpaces(img.spaceMap)
-
-	g := mp1.InitializeGame(img.board, mp1.GameConfig{MaxTurns: 20})
+func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
+	g := mp1.InitializeGame(boardWdgt.board, mp1.GameConfig{MaxTurns: 20})
 	g.Players[0].Char = "Mario"
 	g.Players[1].Char = "Luigi"
 	g.Players[2].Char = "Peach"
 	g.Players[3].Char = "Yoshi"
 
-	gHandler := &GameHandler{Game: g}
-	img.spaceMap.setGameHandler(gHandler)
+	gHandler := &GameHandler{Game: g, Controller: &SpaceController{
+		Mode: scmNORMAL,
+		PlayerPos: [4]mp1.ChainSpace{
+			g.Players[0].CurrentSpace,
+			g.Players[1].CurrentSpace,
+			g.Players[2].CurrentSpace,
+			g.Players[3].CurrentSpace,
+		},
+		Board: boardWdgt,
+	}}
+	gHandler.Controller.SetPlayerCircPositions()
+	boardWdgt.spaceMap.setGameHandler(gHandler)
 
-	p0 := NewPlayer(g, 0)
-	p1 := NewPlayer(g, 1)
-	p2 := NewPlayer(g, 2)
-	p3 := NewPlayer(g, 3)
+	p0 := NewPlayer(g, 0, boardWdgt.spaceMap)
+	p1 := NewPlayer(g, 1, boardWdgt.spaceMap)
+	p2 := NewPlayer(g, 2, boardWdgt.spaceMap)
+	p3 := NewPlayer(g, 3, boardWdgt.spaceMap)
 	eventText := widget.NewLabel("")
 	setText := func() {
 		p0.Refresh()
@@ -55,10 +63,25 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 		layout.NewVBoxLayout(),
 		eventText,
 	)
-	baseResponseContainer := container.New(layout.NewHBoxLayout(), createUserInputUI(gHandler, img.spaceMap))
+	baseResponseContainer := container.New(layout.NewHBoxLayout(), createUserInputUI(gHandler, boardWdgt.spaceMap))
+	modeSelector := widget.NewRadioGroup(
+		[]string{"Normal", "Show Player Positions", "Show All Spaces"},
+		func(s string) {
+			switch s {
+			case "Normal":
+				gHandler.Controller.SetMode(scmNORMAL)
+			case "Show Player Positions":
+				gHandler.Controller.SetMode(scmSHOW_PLAYERS)
+			case "Show All Spaces":
+				gHandler.Controller.SetMode(scmSHOW_ALL_SPACES)
+			}
+		},
+	)
+	modeSelector.SetSelected("Normal")
 	aiPanel := container.New(
 		layout.NewHBoxLayout(),
 		baseResponseContainer,
+		modeSelector,
 		container.New(
 			layout.NewVBoxLayout(),
 			canvas.NewText("AI says 1, 2", color.White),
@@ -72,12 +95,9 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 					return
 				}
 
-				//Reset Space
-				hideAllSpaces(img.spaceMap)
-
 				//Update UI with data from new Event
 				setText()
-				baseResponseContainer.Objects[0] = createUserInputUI(gHandler, img.spaceMap)
+				baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
 				baseResponseContainer.Refresh()
 			}),
 		),
@@ -93,7 +113,7 @@ func makeAIUI(w fyne.Window, img *image) fyne.CanvasObject {
 	imgLayout := container.New(
 		layout.NewHBoxLayout(),
 		layout.NewSpacer(),
-		img,
+		boardWdgt,
 		layout.NewSpacer(),
 	)
 	ui := container.New(

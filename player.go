@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"github.com/0xhexnumbers/partysim/mp1"
@@ -14,26 +12,13 @@ import (
 
 type Player struct {
 	widget.BaseWidget
-	g    *mp1.Game
-	pIdx int
+	g        *mp1.Game
+	pIdx     int
+	spaceMap SpaceCirc
 }
 
-// MouseIn is a hook that is called if the mouse pointer enters the element.
-func (p *Player) MouseIn(_ *desktop.MouseEvent) {
-	log.Printf("Over Player %d", p.pIdx)
-}
-
-// MouseMoved is a hook that is called if the mouse pointer moved over the element.
-func (p *Player) MouseMoved(_ *desktop.MouseEvent) {
-}
-
-// MouseOut is a hook that is called if the mouse pointer leaves the element.
-func (p *Player) MouseOut() {
-	log.Printf("Left Player %d", p.pIdx)
-}
-
-func NewPlayer(g *mp1.Game, pIdx int) *Player {
-	p := &Player{widget.BaseWidget{}, g, pIdx}
+func NewPlayer(g *mp1.Game, pIdx int, sm SpaceCirc) *Player {
+	p := &Player{widget.BaseWidget{}, g, pIdx, sm}
 	p.ExtendBaseWidget(p)
 	return p
 }
