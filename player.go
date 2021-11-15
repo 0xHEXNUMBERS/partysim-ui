@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -15,10 +16,26 @@ type Player struct {
 	g        *mp1.Game
 	pIdx     int
 	spaceMap SpaceCirc
+	rect     *canvas.Rectangle
 }
 
 func NewPlayer(g *mp1.Game, pIdx int, sm SpaceCirc) *Player {
-	p := &Player{widget.BaseWidget{}, g, pIdx, sm}
+	p := &Player{
+		BaseWidget: widget.BaseWidget{},
+		g:          g,
+		pIdx:       pIdx,
+		spaceMap:   sm,
+	}
+	switch pIdx {
+	case 0:
+		p.rect = canvas.NewRectangle(scPlayer1Colors.dorment)
+	case 1:
+		p.rect = canvas.NewRectangle(scPlayer2Colors.dorment)
+	case 2:
+		p.rect = canvas.NewRectangle(scPlayer3Colors.dorment)
+	case 3:
+		p.rect = canvas.NewRectangle(scPlayer4Colors.dorment)
+	}
 	p.ExtendBaseWidget(p)
 	return p
 }
@@ -45,7 +62,7 @@ func (p *PlayerRenderer) Layout(_ fyne.Size) {
 
 // MinSize returns the minimum size of the widget that is rendered by this renderer.
 func (p *PlayerRenderer) MinSize() (size fyne.Size) {
-	size.Width += p.count.Size().Width + p.charName.Size().Width
+	size.Width += p.Player.rect.Size().Width + p.count.Size().Width + p.charName.Size().Width
 	size.Height += p.count.Size().Height
 	return size
 }
@@ -65,9 +82,11 @@ func (p *PlayerRenderer) Refresh() {
 			p.Player.g.Players[p.Player.pIdx].Coins,
 		),
 	)
+	p.Player.rect.SetMinSize(fyne.NewSize(10, 10))
 	p.objects = []fyne.CanvasObject{
 		container.New(
 			layout.NewHBoxLayout(),
+			p.Player.rect,
 			p.charName,
 			container.New(
 				layout.NewVBoxLayout(),
