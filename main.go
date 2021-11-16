@@ -1,11 +1,10 @@
 package main
 
 import (
-	"image/color"
+	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -78,13 +77,14 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		},
 	)
 	modeSelector.SetSelected("Normal")
+	aiSelection := widget.NewLabel("[I will tell you what the AI recommends]")
 	aiPanel := container.New(
 		layout.NewHBoxLayout(),
 		baseResponseContainer,
 		modeSelector,
 		container.New(
 			layout.NewVBoxLayout(),
-			canvas.NewText("AI says 1, 2", color.White),
+			aiSelection,
 			widget.NewButton("Continue with Selection", func() {
 				if g.NextEvent == nil {
 					return
@@ -99,6 +99,10 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 				setText()
 				baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
 				baseResponseContainer.Refresh()
+			}),
+			widget.NewButton("Run AI", func() {
+				res := bestMove(*gHandler.Game)
+				aiSelection.SetText(fmt.Sprintf("%#v", res))
 			}),
 		),
 	)
