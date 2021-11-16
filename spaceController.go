@@ -63,6 +63,12 @@ func (s *SpaceController) SetPlayerCircPositions() {
 
 func (s *SpaceController) SetNormalCircs(chainSpaces []mp1.ChainSpace) {
 	log.Println("SpaceController.SetNormalCircs: Setting normal circs")
+
+	for _, circ := range s.NormalCircs {
+		log.Printf("SpaceController.SetNormalCircs: Hiding space %#v",
+			circ.chainSpace)
+		circ.Hide()
+	}
 	if chainSpaces == nil || len(chainSpaces) == 0 {
 		log.Println("SpaceController.SetNormalCircs: No circles to show")
 		s.NormalCircs = nil
@@ -77,6 +83,8 @@ func (s *SpaceController) SetNormalCircs(chainSpaces []mp1.ChainSpace) {
 		)
 		s.NormalCircs[i] = s.Board.spaceMap[cs]
 	}
+	//Reset Screen
+	s.SetMode(s.Mode)
 }
 
 func (s *SpaceController) HideAllBoardSpaces() {
