@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"runtime"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -10,6 +12,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/0xhexnumbers/partysim/mp1"
 )
+
+var CPUS = runtime.NumCPU()
 
 func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	g := mp1.InitializeGame(boardWdgt.board, mp1.GameConfig{MaxTurns: 20})
@@ -104,6 +108,25 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		baseResponseContainer.Refresh()
 	})
 
+	aiThreadCountText := widget.NewLabel("Threads: 1/" + strconv.Itoa(CPUS))
+	aiThreadCount := widget.NewSlider(1, float64(CPUS))
+	aiThreadCount.Step = 1
+	aiThreadCount.OnChanged = func(f float64) {
+		aiThreadCountText.SetText(
+			"Threads: " + strconv.Itoa(int(f)) +
+				"/" + strconv.Itoa(CPUS),
+		)
+	}
+
+	aiMillisecondsText := widget.NewLabel("1 Milliseconds")
+	aiMilliseconds := widget.NewSlider(1, 10000)
+	aiMilliseconds.Step = 1
+	aiMilliseconds.OnChanged = func(f float64) {
+		aiMillisecondsText.SetText(
+			strconv.Itoa(int(f)) + " Milliseconds",
+		)
+	}
+
 	//AI Controller
 	aiSelection := widget.NewLabel("[I will tell you what the AI recommends]")
 	aiButton := widget.NewButton("Run AI", nil)
@@ -112,7 +135,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 			selectionButton.Disable()
 			aiButton.Disable()
 
-			res := bestMove(*gHandler.Game)
+			res := bestMove(*gHandler.Game, int(aiThreadCount.Value), int(aiMilliseconds.Value))
 			aiSelection.SetText(fmt.Sprintf("%#v", res))
 
 			aiButton.Enable()
@@ -133,6 +156,10 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 
 			//AI Controller
 			layout.NewSpacer(),
+			aiThreadCountText,
+			aiThreadCount,
+			aiMillisecondsText,
+			aiMilliseconds,
 			aiSelection,
 			aiButton,
 

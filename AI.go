@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sync"
 	"time"
 
 	"github.com/0xhexnumbers/gmcts/v2"
@@ -49,22 +50,20 @@ func (g GameState) Winners() []gmcts.Player {
 	return gmctsWinners
 }
 
-func bestMove(g mp1.Game) mp1.Response {
-	const THREADS = 12
-
+func bestMove(g mp1.Game, threads, milliseconds int) mp1.Response {
 	mcts := gmcts.NewMCTS(GameState{g, g.Responses()})
 	mcts.SetSeed(time.Now().Unix())
-	//var wait sync.WaitGroup
-	//wait.Add(THREADS)
-	/*for i := 0; i < THREADS; i++ {
-	go func() {*/
-	tree := mcts.SpawnTree()
-	tree.Search(time.Second * 5)
-	mcts.AddTree(tree)
-	//wait.Done()
-	/*}()
-	}*/
-	//wait.Wait()
+	var wait sync.WaitGroup
+	wait.Add(threads)
+	for i := 0; i < threads; i++ {
+		go func() {
+			tree := mcts.SpawnTree()
+			tree.Search(time.Millisecond * time.Duration(milliseconds))
+			mcts.AddTree(tree)
+			wait.Done()
+		}()
+	}
+	wait.Wait()
 	i, _ := mcts.BestAction()
 
 	return g.Responses()[i]
