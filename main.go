@@ -77,33 +77,48 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		},
 	)
 	modeSelector.SetSelected("Normal")
+
+	selectionButton := widget.NewButton("Continue with Selection", func() {
+		if g.NextEvent == nil {
+			return
+		}
+		//Execute Event
+		err := gHandler.HandleEvent()
+		if err != nil { //Tell user no response is selected
+			return
+		}
+
+		//Update UI with data from new Event
+		setText()
+		baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
+		baseResponseContainer.Refresh()
+	})
+
 	aiSelection := widget.NewLabel("[I will tell you what the AI recommends]")
+	aiButton := widget.NewButton("Run AI", nil)
+	aiFunc := func() {
+		go func() {
+			selectionButton.Disable()
+			aiButton.Disable()
+
+			res := bestMove(*gHandler.Game)
+			aiSelection.SetText(fmt.Sprintf("%#v", res))
+
+			aiButton.Enable()
+			selectionButton.Enable()
+		}()
+	}
+	aiButton.OnTapped = aiFunc
+
 	aiPanel := container.New(
 		layout.NewHBoxLayout(),
 		baseResponseContainer,
 		modeSelector,
 		container.New(
 			layout.NewVBoxLayout(),
+			selectionButton,
 			aiSelection,
-			widget.NewButton("Continue with Selection", func() {
-				if g.NextEvent == nil {
-					return
-				}
-				//Execute Event
-				err := gHandler.HandleEvent()
-				if err != nil { //Tell user no response is selected
-					return
-				}
-
-				//Update UI with data from new Event
-				setText()
-				baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
-				baseResponseContainer.Refresh()
-			}),
-			widget.NewButton("Run AI", func() {
-				res := bestMove(*gHandler.Game)
-				aiSelection.SetText(fmt.Sprintf("%#v", res))
-			}),
+			aiButton,
 		),
 	)
 	panel := container.New(
