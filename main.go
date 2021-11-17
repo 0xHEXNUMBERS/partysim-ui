@@ -31,10 +31,13 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	gHandler.Controller.SetPlayerCircPositions()
 	boardWdgt.spaceMap.setGameHandler(gHandler)
 
+	//Player statistics
 	p0 := NewPlayer(g, 0, boardWdgt.spaceMap)
 	p1 := NewPlayer(g, 1, boardWdgt.spaceMap)
 	p2 := NewPlayer(g, 2, boardWdgt.spaceMap)
 	p3 := NewPlayer(g, 3, boardWdgt.spaceMap)
+
+	//Updates player stats and event text after each event execution.
 	eventText := widget.NewLabel("")
 	setText := func() {
 		p0.Refresh()
@@ -45,6 +48,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	}
 	setText()
 
+	//Collectables View
 	collectablesPanel := container.New(
 		layout.NewVBoxLayout(),
 		container.New(
@@ -58,11 +62,16 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 			p3,
 		),
 	)
-	userPanel := container.New(
-		layout.NewVBoxLayout(),
-		eventText,
+
+	//Event Response Selector
+	//The underlying widget may change types, so we use an container
+	//that never changes to hold the changing widget.
+	baseResponseContainer := container.New(
+		layout.NewHBoxLayout(),
+		createUserInputUI(gHandler, boardWdgt.spaceMap),
 	)
-	baseResponseContainer := container.New(layout.NewHBoxLayout(), createUserInputUI(gHandler, boardWdgt.spaceMap))
+
+	//Mode Controller
 	modeSelector := widget.NewRadioGroup(
 		[]string{"Normal", "Show Player Positions", "Show All Spaces"},
 		func(s string) {
@@ -78,6 +87,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	)
 	modeSelector.SetSelected("Normal")
 
+	//User Simulation Controller
 	selectionButton := widget.NewButton("Continue with Selection", func() {
 		if g.NextEvent == nil {
 			return
@@ -94,6 +104,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		baseResponseContainer.Refresh()
 	})
 
+	//AI Controller
 	aiSelection := widget.NewLabel("[I will tell you what the AI recommends]")
 	aiButton := widget.NewButton("Run AI", nil)
 	aiFunc := func() {
@@ -110,36 +121,35 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	}
 	aiButton.OnTapped = aiFunc
 
-	aiPanel := container.New(
+	//Plug user input widgets together
+	userInputRegion := container.New(
 		layout.NewHBoxLayout(),
-		baseResponseContainer,
-		modeSelector,
-		container.New(
-			layout.NewVBoxLayout(),
-			selectionButton,
-			aiSelection,
-			aiButton,
-		),
-	)
-	panel := container.New(
-		layout.NewHBoxLayout(),
-		collectablesPanel,
-		layout.NewSpacer(),
-		userPanel,
-		layout.NewSpacer(),
-		aiPanel,
-	)
-	imgLayout := container.New(
-		layout.NewHBoxLayout(),
-		layout.NewSpacer(),
 		boardWdgt,
 		layout.NewSpacer(),
+		container.New(
+			//Mode Selector
+			layout.NewVBoxLayout(),
+			modeSelector,
+
+			//AI Controller
+			layout.NewSpacer(),
+			aiSelection,
+			aiButton,
+
+			//User Input to Simulation
+			layout.NewSpacer(),
+			eventText,
+			baseResponseContainer,
+			selectionButton,
+		),
 	)
+
+	//Plug everything together
 	ui := container.New(
 		layout.NewVBoxLayout(),
-		imgLayout,
+		userInputRegion,
 		layout.NewSpacer(),
-		panel,
+		collectablesPanel,
 	)
 	return ui
 }
