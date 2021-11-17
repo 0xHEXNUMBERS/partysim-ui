@@ -23,16 +23,15 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	g.Players[3].Char = "Yoshi"
 
 	gHandler := &GameHandler{Game: g, Controller: &SpaceController{
-		Mode: scmNORMAL,
-		PlayerPos: [4]mp1.ChainSpace{
-			g.Players[0].CurrentSpace,
-			g.Players[1].CurrentSpace,
-			g.Players[2].CurrentSpace,
-			g.Players[3].CurrentSpace,
-		},
+		Mode:  scmNORMAL,
 		Board: boardWdgt,
 	}}
-	gHandler.Controller.SetPlayerCircPositions()
+	gHandler.Controller.SetPlayerCircPositions(
+		g.Players[0].CurrentSpace,
+		g.Players[1].CurrentSpace,
+		g.Players[2].CurrentSpace,
+		g.Players[3].CurrentSpace,
+	)
 	boardWdgt.spaceMap.setGameHandler(gHandler)
 
 	//Player statistics

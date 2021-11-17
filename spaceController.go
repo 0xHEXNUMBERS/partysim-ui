@@ -53,8 +53,12 @@ type SpaceController struct {
 	NormalCircs []*space
 }
 
-func (s *SpaceController) SetPlayerCircPositions() {
+func (s *SpaceController) SetPlayerCircPositions(cs1, cs2, cs3, cs4 mp1.ChainSpace) {
 	log.Println("SpaceController.SetPlayerCircPositions: Setting space pos")
+	s.PlayerPos[0] = cs1
+	s.PlayerPos[1] = cs2
+	s.PlayerPos[2] = cs3
+	s.PlayerPos[3] = cs4
 	s.Board.playerCircles[0].pos = s.Board.spaceMap[s.PlayerPos[0]].pos
 	s.Board.playerCircles[1].pos = s.Board.spaceMap[s.PlayerPos[1]].pos
 	s.Board.playerCircles[2].pos = s.Board.spaceMap[s.PlayerPos[2]].pos
@@ -83,28 +87,31 @@ func (s *SpaceController) SetNormalCircs(chainSpaces []mp1.ChainSpace) {
 		)
 		s.NormalCircs[i] = s.Board.spaceMap[cs]
 	}
+
 	//Reset Screen
-	s.SetMode(s.Mode)
+	s.Board.Refresh()
 }
 
-func (s *SpaceController) HideAllBoardSpaces() {
-	log.Printf("SpaceController.HideAllBoardSpaces: Hiding all circles")
+func (s *SpaceController) HideAllSpaces() {
+	log.Printf("SpaceController.HideAllSpaces: Hiding all circles")
 	for _, circ := range s.Board.spaceMap {
 		circ.Hide()
 	}
+	s.Board.playerCircles[0].Hide()
+	s.Board.playerCircles[1].Hide()
+	s.Board.playerCircles[2].Hide()
+	s.Board.playerCircles[3].Hide()
 }
 
 func (s *SpaceController) SetMode(sm SpaceControllerMode) {
-	log.Printf("spaceController.SetMode: Setting mode from %s to %s",
-		s.Mode, sm)
+	className := "SpaceController"
+	functName := className + ".SetMode: "
 
-	s.HideAllBoardSpaces()
+	s.HideAllSpaces()
+
+	log.Printf(functName+"Setting mode from %s to %s", s.Mode, sm)
 	switch sm {
 	case scmNORMAL:
-		s.Board.playerCircles[0].Hide()
-		s.Board.playerCircles[1].Hide()
-		s.Board.playerCircles[2].Hide()
-		s.Board.playerCircles[3].Hide()
 		for _, space := range s.NormalCircs {
 			space.Show()
 		}
@@ -114,10 +121,6 @@ func (s *SpaceController) SetMode(sm SpaceControllerMode) {
 		s.Board.playerCircles[2].Show()
 		s.Board.playerCircles[3].Show()
 	case scmSHOW_ALL_SPACES:
-		s.Board.playerCircles[0].Hide()
-		s.Board.playerCircles[1].Hide()
-		s.Board.playerCircles[2].Hide()
-		s.Board.playerCircles[3].Hide()
 		for _, space := range s.Board.spaceMap {
 			space.Show()
 		}

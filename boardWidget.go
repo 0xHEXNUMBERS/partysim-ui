@@ -87,6 +87,7 @@ func (i boardRenderer) Objects() []fyne.CanvasObject {
 // Refresh is a hook that is called if the widget has updated and needs to be redrawn.
 // This might trigger a Layout.
 func (i boardRenderer) Refresh() {
+	i.img.circles.Refresh()
 }
 
 type imageLoader struct {

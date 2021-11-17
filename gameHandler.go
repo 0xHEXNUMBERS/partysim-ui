@@ -38,11 +38,12 @@ func (g *GameHandler) HandleEvent() error {
 	g.Controller.SetNormalCircs(nil)
 
 	//Update Controller with current player spaces
-	g.Controller.PlayerPos[0] = g.Players[0].CurrentSpace
-	g.Controller.PlayerPos[1] = g.Players[1].CurrentSpace
-	g.Controller.PlayerPos[2] = g.Players[2].CurrentSpace
-	g.Controller.PlayerPos[3] = g.Players[3].CurrentSpace
-	g.Controller.SetPlayerCircPositions()
+	g.Controller.SetPlayerCircPositions(
+		g.Players[0].CurrentSpace,
+		g.Players[1].CurrentSpace,
+		g.Players[2].CurrentSpace,
+		g.Players[3].CurrentSpace,
+	)
 
 	return nil
 }
