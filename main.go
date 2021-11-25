@@ -35,38 +35,6 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	)
 	boardWdgt.spaceMap.setGameHandler(gHandler)
 
-	//Player statistics
-	p0 := NewPlayer(g, 0, boardWdgt.spaceMap)
-	p1 := NewPlayer(g, 1, boardWdgt.spaceMap)
-	p2 := NewPlayer(g, 2, boardWdgt.spaceMap)
-	p3 := NewPlayer(g, 3, boardWdgt.spaceMap)
-
-	//Updates player stats and event text after each event execution.
-	eventText := widget.NewLabel("")
-	setText := func() {
-		p0.Refresh()
-		p1.Refresh()
-		p2.Refresh()
-		p3.Refresh()
-		eventText.SetText(g.NextEvent.Question(g))
-	}
-	setText()
-
-	//Collectables View
-	collectablesPanel := container.New(
-		layout.NewVBoxLayout(),
-		container.New(
-			layout.NewHBoxLayout(),
-			p0,
-			p1,
-		),
-		container.New(
-			layout.NewHBoxLayout(),
-			p2,
-			p3,
-		),
-	)
-
 	//Event Response Selector
 	//The underlying widget may change types, so we use an container
 	//that never changes to hold the changing widget.
@@ -93,23 +61,6 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	)
 	modeSelector.SetSelected("Normal")
 
-	//User Simulation Controller
-	selectionButton := widget.NewButton("Continue with Selection", func() {
-		if g.NextEvent == nil {
-			return
-		}
-		//Execute Event
-		err := gHandler.HandleEvent()
-		if err != nil { //Tell user no response is selected
-			return
-		}
-
-		//Update UI with data from new Event
-		setText()
-		baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
-		baseResponseContainer.Refresh()
-	})
-
 	aiThreadCountText := widget.NewLabel("Threads: 1/" + strconv.Itoa(CPUS))
 	aiThreadCount := widget.NewSlider(1, float64(CPUS))
 	aiThreadCount.Step = 1
@@ -128,6 +79,8 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 			strconv.Itoa(int(f)) + " Milliseconds",
 		)
 	}
+
+	selectionButton := widget.NewButton("Continue with Selection", nil)
 
 	//AI Controller
 	aiSelection := widget.NewLabel(DEFAULT_AI_TEXT)
@@ -167,6 +120,49 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	}
 	aiButton.OnTapped = aiFunc
 
+	//Player statistics
+	p0 := NewPlayer(g, 0, boardWdgt.spaceMap)
+	p1 := NewPlayer(g, 1, boardWdgt.spaceMap)
+	p2 := NewPlayer(g, 2, boardWdgt.spaceMap)
+	p3 := NewPlayer(g, 3, boardWdgt.spaceMap)
+
+	//Updates player stats and event text after each event execution.
+	eventText := widget.NewLabel("")
+	preEventHandler := func() {
+		p0.Refresh()
+		p1.Refresh()
+		p2.Refresh()
+		p3.Refresh()
+		eventText.SetText(g.NextEvent.Question(g))
+		aiSelection.SetText(DEFAULT_AI_TEXT)
+
+		//Disable AI if CPU Player handles event
+		if gHandler.NextEvent.ControllingPlayer() == mp1.CPU_PLAYER {
+			aiButton.Disable()
+		} else {
+			aiButton.Enable()
+		}
+	}
+	preEventHandler()
+
+	//User Simulation Controller
+	selectionFunc := func() {
+		if g.NextEvent == nil {
+			return
+		}
+		//Execute Event
+		err := gHandler.HandleEvent()
+		if err != nil { //Tell user no response is selected
+			return
+		}
+
+		//Update UI with data from new Event
+		preEventHandler()
+		baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
+		baseResponseContainer.Refresh()
+	}
+	selectionButton.OnTapped = selectionFunc
+
 	//Plug user input widgets together
 	userInputRegion := container.New(
 		layout.NewHBoxLayout(),
@@ -192,6 +188,21 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 			eventText,
 			baseResponseContainer,
 			selectionButton,
+		),
+	)
+
+	//Collectables View
+	collectablesPanel := container.New(
+		layout.NewVBoxLayout(),
+		container.New(
+			layout.NewHBoxLayout(),
+			p0,
+			p1,
+		),
+		container.New(
+			layout.NewHBoxLayout(),
+			p2,
+			p3,
 		),
 	)
 
