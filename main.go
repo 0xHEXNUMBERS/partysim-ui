@@ -14,6 +14,8 @@ import (
 
 var CPUS = runtime.NumCPU()
 
+const DEFAULT_AI_TEXT = "[I will tell you what the AI recommends]"
+
 func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	g := mp1.InitializeGame(boardWdgt.board, mp1.GameConfig{MaxTurns: 20})
 	g.Players[0].Char = "Mario"
@@ -128,7 +130,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	}
 
 	//AI Controller
-	aiSelection := widget.NewLabel("[I will tell you what the AI recommends]")
+	aiSelection := widget.NewLabel(DEFAULT_AI_TEXT)
 	aiButton := widget.NewButton("Run AI", nil)
 	aiFunc := func() {
 		go func() {
