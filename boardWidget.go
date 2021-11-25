@@ -35,6 +35,7 @@ type boardWidget struct {
 	spaceMap      SpaceCirc
 	circles       *fyne.Container
 	playerCircles [4]*space
+	aiCircle      *space
 	board         mp1.Board
 }
 
@@ -120,6 +121,7 @@ func (i imageLoader) initImage(img *boardWidget, filePath string, spaceMap Space
 			circs.Add(circle)
 		}
 	}
+
 	img.playerCircles[0] = newSpace(scPlayer1Colors, 0, 0, 0, 0)
 	img.playerCircles[1] = newSpace(scPlayer2Colors, 0, 0, 0, 0)
 	img.playerCircles[2] = newSpace(scPlayer3Colors, 0, 0, 0, 0)
@@ -128,6 +130,9 @@ func (i imageLoader) initImage(img *boardWidget, filePath string, spaceMap Space
 	circs.Add(img.playerCircles[1])
 	circs.Add(img.playerCircles[2])
 	circs.Add(img.playerCircles[3])
+
+	img.aiCircle = newSpace(scPlayer1Colors, 0, 0, 0, 0)
+	circs.Add(img.aiCircle)
 	img.circles = circs
 }
 

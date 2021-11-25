@@ -34,11 +34,7 @@ func (g *GameHandler) HandleEvent() error {
 		g.CurrentSpace = nil
 	}
 
-	//Clear screen of Normal Circles
-	g.Controller.SetNormalCircs(nil)
-
-	//Update Controller with current player spaces
-	g.Controller.SetPlayerCircPositions(
+	g.Controller.Reset(
 		g.Players[0].CurrentSpace,
 		g.Players[1].CurrentSpace,
 		g.Players[2].CurrentSpace,

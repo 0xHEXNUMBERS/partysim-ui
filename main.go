@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"runtime"
 	"strconv"
 
@@ -76,7 +75,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 
 	//Mode Controller
 	modeSelector := widget.NewRadioGroup(
-		[]string{"Normal", "Show Player Positions", "Show All Spaces"},
+		[]string{"Normal", "Show Player Positions", "Show All Spaces", "Show AI Choice"},
 		func(s string) {
 			switch s {
 			case "Normal":
@@ -85,6 +84,8 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 				gHandler.Controller.SetMode(scmSHOW_PLAYERS)
 			case "Show All Spaces":
 				gHandler.Controller.SetMode(scmSHOW_ALL_SPACES)
+			case "Show AI Choice":
+				gHandler.Controller.SetMode(scmAI_SPACE_CHOICE)
 			}
 		},
 	)
@@ -135,7 +136,22 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 			aiButton.Disable()
 
 			res := bestMove(*gHandler.Game, int(aiThreadCount.Value), int(aiMilliseconds.Value))
-			aiSelection.SetText(fmt.Sprintf("%#v", res))
+			switch gHandler.Game.NextEvent.Type() {
+			case mp1.ENUM_EVT_TYPE:
+				aiSelection.SetText(enumToString(res))
+			case mp1.RANGE_EVT_TYPE:
+				aiSelection.SetText(rangeToString(res))
+			case mp1.COIN_EVT_TYPE:
+				aiSelection.SetText(coinToString(res))
+			case mp1.PLAYER_EVT_TYPE:
+				aiSelection.SetText(playerToString(res, gHandler.Game))
+			case mp1.MULTIWIN_PLAYER_EVT_TYPE:
+				aiSelection.SetText(multiPlayerToString(res, gHandler.Game))
+			case mp1.CHAINSPACE_EVT_TYPE:
+				cs := res.(mp1.ChainSpace)
+				gHandler.Controller.SetAISpaceChoice(cs)
+				modeSelector.SetSelected("Show AI Choice")
+			}
 
 			aiButton.Enable()
 			selectionButton.Enable()
@@ -151,6 +167,7 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		container.New(
 			//Mode Selector
 			layout.NewVBoxLayout(),
+			widget.NewLabel("Space Options:"),
 			modeSelector,
 
 			//AI Controller

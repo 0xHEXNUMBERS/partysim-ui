@@ -13,6 +13,7 @@ const (
 	scmNORMAL SpaceControllerMode = iota
 	scmSHOW_PLAYERS
 	scmSHOW_ALL_SPACES
+	scmAI_SPACE_CHOICE
 )
 
 func (s SpaceControllerMode) String() string {
@@ -23,6 +24,8 @@ func (s SpaceControllerMode) String() string {
 		return "scmSHOW_PLAYERS"
 	case scmSHOW_ALL_SPACES:
 		return "scmSHOW_ALL_SPACES"
+	case scmAI_SPACE_CHOICE:
+		return "scmAI_SPACE_CHOICE"
 	}
 	return ""
 }
@@ -47,10 +50,32 @@ var (
 )
 
 type SpaceController struct {
-	Mode        SpaceControllerMode
-	PlayerPos   [4]mp1.ChainSpace
-	Board       *boardWidget
-	NormalCircs []*space
+	Mode               SpaceControllerMode
+	PlayerPos          [4]mp1.ChainSpace
+	ShowAIsChosenSpace bool
+	AIChoice           mp1.ChainSpace
+	Board              *boardWidget
+	NormalCircs        []*space
+}
+
+func (s *SpaceController) Reset(cs1, cs2, cs3, cs4 mp1.ChainSpace) {
+	//Clear screen of Normal Circles
+	s.SetNormalCircs(nil)
+
+	//Update Controller with current player spaces
+	s.SetPlayerCircPositions(cs1, cs2, cs3, cs4)
+
+	//Remove AI Selection
+	s.ShowAIsChosenSpace = false
+	s.Board.aiCircle.Hide()
+}
+
+func (s *SpaceController) SetAISpaceChoice(cs mp1.ChainSpace) {
+	functName := "SpaceController.SetAISpaceChoise: "
+	log.Printf(functName+"Setting ai pos to {%d, %d}", cs.Chain, cs.Space)
+	s.AIChoice = cs
+	s.Board.aiCircle.pos = s.Board.spaceMap[s.AIChoice].pos
+	s.ShowAIsChosenSpace = true
 }
 
 func (s *SpaceController) SetPlayerCircPositions(cs1, cs2, cs3, cs4 mp1.ChainSpace) {
@@ -101,6 +126,7 @@ func (s *SpaceController) HideAllSpaces() {
 	s.Board.playerCircles[1].Hide()
 	s.Board.playerCircles[2].Hide()
 	s.Board.playerCircles[3].Hide()
+	s.Board.aiCircle.Hide()
 }
 
 func (s *SpaceController) SetMode(sm SpaceControllerMode) {
@@ -123,6 +149,10 @@ func (s *SpaceController) SetMode(sm SpaceControllerMode) {
 	case scmSHOW_ALL_SPACES:
 		for _, space := range s.Board.spaceMap {
 			space.Show()
+		}
+	case scmAI_SPACE_CHOICE:
+		if s.ShowAIsChosenSpace {
+			s.Board.aiCircle.Show()
 		}
 	}
 	s.Mode = sm
