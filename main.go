@@ -136,21 +136,27 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 			aiButton.Disable()
 
 			res := bestMove(*gHandler.Game, int(aiThreadCount.Value), int(aiMilliseconds.Value))
-			switch gHandler.Game.NextEvent.Type() {
-			case mp1.ENUM_EVT_TYPE:
-				aiSelection.SetText(enumToString(res))
-			case mp1.RANGE_EVT_TYPE:
-				aiSelection.SetText(rangeToString(res))
-			case mp1.COIN_EVT_TYPE:
-				aiSelection.SetText(coinToString(res))
-			case mp1.PLAYER_EVT_TYPE:
-				aiSelection.SetText(playerToString(res, gHandler.Game))
-			case mp1.MULTIWIN_PLAYER_EVT_TYPE:
-				aiSelection.SetText(multiPlayerToString(res, gHandler.Game))
-			case mp1.CHAINSPACE_EVT_TYPE:
+			evtType := gHandler.Game.NextEvent.Type()
+			if evtType == mp1.CHAINSPACE_EVT_TYPE {
 				cs := res.(mp1.ChainSpace)
 				gHandler.Controller.SetAISpaceChoice(cs)
 				modeSelector.SetSelected("Show AI Choice")
+				aiSelection.SetText("AI Response: [Shown on Board]")
+			} else {
+				var aiText string
+				switch evtType {
+				case mp1.ENUM_EVT_TYPE:
+					aiText = enumToString(res)
+				case mp1.RANGE_EVT_TYPE:
+					aiText = rangeToString(res)
+				case mp1.COIN_EVT_TYPE:
+					aiText = coinToString(res)
+				case mp1.PLAYER_EVT_TYPE:
+					aiText = playerToString(res, gHandler.Game)
+				case mp1.MULTIWIN_PLAYER_EVT_TYPE:
+					aiText = multiPlayerToString(res, gHandler.Game)
+				}
+				aiSelection.SetText("AI Response: " + aiText)
 			}
 
 			aiButton.Enable()
