@@ -16,7 +16,7 @@ var CPUS = runtime.NumCPU()
 
 const DEFAULT_AI_TEXT = "[I will tell you what the AI recommends]"
 
-func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
+func makeMainUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	g := mp1.InitializeGame(boardWdgt.board, mp1.GameConfig{MaxTurns: 20})
 	g.Players[0].Char = "Mario"
 	g.Players[1].Char = "Luigi"
@@ -225,7 +225,7 @@ func main() {
 	uiApp := app.New()
 	window := uiApp.NewWindow("PartySim")
 
-	ui := makeAIUI(window, lerImage)
+	ui := makeMainUI(window, lerImage)
 	window.SetContent(ui)
 	window.ShowAndRun()
 }
