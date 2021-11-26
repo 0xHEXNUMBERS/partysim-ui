@@ -160,6 +160,9 @@ func makeAIUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		preEventHandler()
 		baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
 		baseResponseContainer.Refresh()
+
+		//Reset UI
+		gHandler.Controller.SetMode(gHandler.Controller.Mode)
 	}
 	selectionButton.OnTapped = selectionFunc
 

@@ -41,6 +41,9 @@ func (g *GameHandler) HandleEvent() error {
 		g.Players[3].CurrentSpace,
 	)
 
+	//Refresh UI
+	g.Controller.Board.Refresh()
+
 	return nil
 }
 

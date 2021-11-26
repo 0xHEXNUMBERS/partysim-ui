@@ -112,9 +112,6 @@ func (s *SpaceController) SetNormalCircs(chainSpaces []mp1.ChainSpace) {
 		)
 		s.NormalCircs[i] = s.Board.spaceMap[cs]
 	}
-
-	//Reset Screen
-	s.Board.Refresh()
 }
 
 func (s *SpaceController) HideAllSpaces() {
