@@ -375,18 +375,10 @@ func makeConfigScreen(canvas fyne.Canvas) fyne.CanvasObject {
 			mp1BoardConfig, p1Conf, p2Conf, p3Conf, p4Conf,
 		)
 
-		var maxTurns uint8
-		switch maxTurnsInput.Selected {
-		case "20":
-			maxTurns = 20
-		case "35":
-			maxTurns = 35
-		case "50":
-			maxTurns = 50
-		}
+		maxTurns, _ := strconv.Atoi(maxTurnsInput.Selected)
 
 		gc := mp1.GameConfig{
-			MaxTurns:     maxTurns,
+			MaxTurns:     uint8(maxTurns),
 			NoBonusStars: bonusStarsInput.Checked,
 			NoKoopa:      koopaInput.Checked,
 			NoBoo:        booInput.Checked,
