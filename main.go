@@ -135,16 +135,47 @@ func makeMainUI(boardWdgt *boardWidget, gc mp1.GameConfig,
 		p3.Refresh()
 		p4.Refresh()
 		eventText.SetText(g.NextEvent.Question(g))
-		aiSelection.SetText(DEFAULT_AI_TEXT)
 
+		aiSelection.SetText(DEFAULT_AI_TEXT)
 		//Disable AI if CPU Player handles event
 		if gHandler.NextEvent.ControllingPlayer() == mp1.CPU_PLAYER {
 			aiButton.Disable()
 		} else {
 			aiButton.Enable()
 		}
+
+		baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
+		baseResponseContainer.Refresh()
+
+		//Reset UI
+		gHandler.Controller.SetMode(gHandler.Controller.Mode)
 	}
 	preEventHandler()
+
+	postGameHandler := func() {
+		p1.Refresh()
+		p2.Refresh()
+		p3.Refresh()
+		p4.Refresh()
+
+		//Reuse Event Text to show winners
+		winnerIDs := g.Winners()
+		winnersText := ""
+		for _, pID := range winnerIDs {
+			winnersText += g.Players[pID].Char + " & "
+		}
+		winnersText = winnersText[:len(winnersText)-2]
+		winnersText += "have won the game!"
+		eventText.SetText(winnersText)
+
+		//Update user input UI to say the game has finished.
+		baseResponseContainer.Objects[0] = widget.NewLabel("The game has finished!")
+		baseResponseContainer.Refresh()
+
+		//Disable all buttons
+		aiButton.Disable()
+		selectionButton.Disable()
+	}
 
 	//User Simulation Controller
 	selectionFunc := func() {
@@ -157,13 +188,12 @@ func makeMainUI(boardWdgt *boardWidget, gc mp1.GameConfig,
 			return
 		}
 
-		//Update UI with data from new Event
-		preEventHandler()
-		baseResponseContainer.Objects[0] = createUserInputUI(gHandler, boardWdgt.spaceMap)
-		baseResponseContainer.Refresh()
-
-		//Reset UI
-		gHandler.Controller.SetMode(gHandler.Controller.Mode)
+		if g.NextEvent != nil {
+			//Update UI with data from new Event
+			preEventHandler()
+		} else {
+			postGameHandler()
+		}
 	}
 	selectionButton.OnTapped = selectionFunc
 
