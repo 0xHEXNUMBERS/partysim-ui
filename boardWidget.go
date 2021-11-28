@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -18,16 +19,62 @@ const (
 )
 
 var (
-	imageSize              = fyne.NewSize(height*aspectRatio, height)
-	ytiImage  *boardWidget = &boardWidget{board: board.YTI}
-	dkjaImage *boardWidget = &boardWidget{board: board.DKJA}
-	pbcImage  *boardWidget = &boardWidget{board: board.PBC}
-	wbcImage  *boardWidget = &boardWidget{board: board.WBC}
-	lerImage  *boardWidget = &boardWidget{board: board.LER}
-	mrcImage  *boardWidget = &boardWidget{board: board.MRC}
-	bmmImage  *boardWidget = &boardWidget{board: board.BMM}
-	esImage   *boardWidget = &boardWidget{board: board.ES}
+	imageSize = fyne.NewSize(height*aspectRatio, height)
 )
+
+type boardConfig struct {
+	board    mp1.Board
+	filePath string
+	spaceMap SpaceCirc
+}
+
+var YTI = boardConfig{
+	board:    board.YTI,
+	filePath: "./img/YoshisTropicalIsland.png",
+	spaceMap: ytiSpaceToPos,
+}
+
+var DKJA = boardConfig{
+	board:    board.DKJA,
+	filePath: "./img/DKsJungleAdventure.png",
+	spaceMap: dkjaSpaceToPos,
+}
+
+var PBC = boardConfig{
+	board:    board.PBC,
+	filePath: "./img/PeachsBirthdayCake.png",
+	spaceMap: pbcSpaceToPos,
+}
+
+var WBC = boardConfig{
+	board:    board.WBC,
+	filePath: "./img/WariosBattleCanyon.png",
+	spaceMap: wbcSpaceToPos,
+}
+
+var LER = boardConfig{
+	board:    board.LER,
+	filePath: "./img/LuigisEngineRoom.png",
+	spaceMap: lerSpaceToPos,
+}
+
+var MRC = boardConfig{
+	board:    board.MRC,
+	filePath: "./img/MariosRainbowCastle.png",
+	spaceMap: mrcSpaceToPos,
+}
+
+var BMM = boardConfig{
+	board:    board.BMM,
+	filePath: "./img/BowsersMagmaMountain.png",
+	spaceMap: bmmSpaceToPos,
+}
+
+var ES = boardConfig{
+	board:    board.ES,
+	filePath: "./img/EternalStar.png",
+	spaceMap: esSpaceToPos,
+}
 
 type boardWidget struct {
 	widget.BaseWidget
@@ -91,62 +138,53 @@ func (i boardRenderer) Refresh() {
 	i.img.circles.Refresh()
 }
 
-type imageLoader struct {
-	err error
-}
-
-func (i *imageLoader) loadImage(filePath string) (img *canvas.Image) {
-	if i.err == nil {
-		var r fyne.Resource
-		r, i.err = fyne.LoadResourceFromPath(filePath)
-		if i.err != nil {
-			return
-		}
-		img = canvas.NewImageFromResource(r)
-		img.FillMode = canvas.ImageFillContain
+func loadImage(filePath string) (img *canvas.Image, err error) {
+	var r fyne.Resource
+	r, err = fyne.LoadResourceFromPath(filePath)
+	if err != nil {
+		return
 	}
+	img = canvas.NewImageFromResource(r)
+	img.FillMode = canvas.ImageFillContain
 	return
 }
 
-func (i imageLoader) initImage(img *boardWidget, filePath string, spaceMap SpaceCirc) {
-	if i.err != nil {
-		return
+func initImage(conf boardConfig,
+	p1Conf, p2Conf, p3Conf, p4Conf PlayerConfig) *boardWidget {
+	var err error
+	boardWdgt := &boardWidget{}
+	boardWdgt.board = conf.board
+	boardWdgt.image, err = loadImage(conf.filePath)
+	if err != nil {
+		panic(fmt.Errorf("Cannot load image: %w", err.Error()))
 	}
-	img.image = i.loadImage(filePath)
-	img.spaceMap = spaceMap
-	img.ExtendBaseWidget(img)
+	boardWdgt.spaceMap = conf.spaceMap
+	boardWdgt.ExtendBaseWidget(boardWdgt)
+
 	circs := container.New(&circlesLayout{})
-	if spaceMap != nil {
-		for _, circle := range img.spaceMap {
+	if conf.spaceMap != nil {
+		for _, circle := range boardWdgt.spaceMap {
 			circs.Add(circle)
 		}
 	}
 
-	img.playerCircles[0] = newSpace(scPlayer1Colors, 0, 0, 0, 0)
-	img.playerCircles[1] = newSpace(scPlayer2Colors, 0, 0, 0, 0)
-	img.playerCircles[2] = newSpace(scPlayer3Colors, 0, 0, 0, 0)
-	img.playerCircles[3] = newSpace(scPlayer4Colors, 0, 0, 0, 0)
-	circs.Add(img.playerCircles[0])
-	circs.Add(img.playerCircles[1])
-	circs.Add(img.playerCircles[2])
-	circs.Add(img.playerCircles[3])
+	boardWdgt.playerCircles[0] = newSpace(p1Conf.Color, 0, 0, 0, 0)
+	boardWdgt.playerCircles[1] = newSpace(p2Conf.Color, 0, 0, 0, 0)
+	boardWdgt.playerCircles[2] = newSpace(p3Conf.Color, 0, 0, 0, 0)
+	boardWdgt.playerCircles[3] = newSpace(p4Conf.Color, 0, 0, 0, 0)
+	circs.Add(boardWdgt.playerCircles[0])
+	circs.Add(boardWdgt.playerCircles[1])
+	circs.Add(boardWdgt.playerCircles[2])
+	circs.Add(boardWdgt.playerCircles[3])
 
-	img.aiCircle = newSpace(scPlayer1Colors, 0, 0, 0, 0)
-	circs.Add(img.aiCircle)
-	img.circles = circs
-}
-
-func load_images() {
-	i := imageLoader{}
-	i.initImage(ytiImage, "./img/YoshisTropicalIsland.png", ytiSpaceToPos)
-	i.initImage(dkjaImage, "./img/DKsJungleAdventure.png", dkjaSpaceToPos)
-	i.initImage(pbcImage, "./img/PeachsBirthdayCake.png", pbcSpaceToPos)
-	i.initImage(wbcImage, "./img/WariosBattleCanyon.png", wbcSpaceToPos)
-	i.initImage(lerImage, "./img/LuigisEngineRoom.png", lerSpaceToPos)
-	i.initImage(mrcImage, "./img/MariosRainbowCastle.png", mrcSpaceToPos)
-	i.initImage(bmmImage, "./img/BowsersMagmaMountain.png", bmmSpaceToPos)
-	i.initImage(esImage, "./img/EternalStar.png", esSpaceToPos)
-	if i.err != nil {
-		panic(fmt.Errorf("cannot load image: %w", i.err))
+	aiColors := spaceColor{
+		dorment:   color.NRGBA{0xc5, 0x88, 0x3a, 0xff},
+		highlight: color.NRGBA{0xe3, 0x83, 0x1c, 0xff},
 	}
+
+	boardWdgt.aiCircle = newSpace(aiColors, 0, 0, 0, 0)
+	circs.Add(boardWdgt.aiCircle)
+	boardWdgt.circles = circs
+
+	return boardWdgt
 }

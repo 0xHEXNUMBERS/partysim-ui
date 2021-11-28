@@ -16,12 +16,13 @@ var CPUS = runtime.NumCPU()
 
 const DEFAULT_AI_TEXT = "[I will tell you what the AI recommends]"
 
-func makeMainUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
-	g := mp1.InitializeGame(boardWdgt.board, mp1.GameConfig{MaxTurns: 20})
-	g.Players[0].Char = "Mario"
-	g.Players[1].Char = "Luigi"
-	g.Players[2].Char = "Peach"
-	g.Players[3].Char = "Yoshi"
+func makeMainUI(boardWdgt *boardWidget, gc mp1.GameConfig,
+	p1Conf, p2Conf, p3Conf, p4Conf PlayerConfig) fyne.CanvasObject {
+	g := mp1.InitializeGame(boardWdgt.board, gc)
+	g.Players[0].Char = p1Conf.Name
+	g.Players[1].Char = p2Conf.Name
+	g.Players[2].Char = p3Conf.Name
+	g.Players[3].Char = p4Conf.Name
 
 	gHandler := &GameHandler{Game: g, Controller: &SpaceController{
 		Mode:  scmNORMAL,
@@ -121,18 +122,18 @@ func makeMainUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	aiButton.OnTapped = aiFunc
 
 	//Player statistics
-	p0 := NewPlayer(g, 0, boardWdgt.spaceMap)
-	p1 := NewPlayer(g, 1, boardWdgt.spaceMap)
-	p2 := NewPlayer(g, 2, boardWdgt.spaceMap)
-	p3 := NewPlayer(g, 3, boardWdgt.spaceMap)
+	p1 := NewPlayer(g, 0, boardWdgt.spaceMap, p1Conf)
+	p2 := NewPlayer(g, 1, boardWdgt.spaceMap, p2Conf)
+	p3 := NewPlayer(g, 2, boardWdgt.spaceMap, p3Conf)
+	p4 := NewPlayer(g, 3, boardWdgt.spaceMap, p4Conf)
 
 	//Updates player stats and event text after each event execution.
 	eventText := widget.NewLabel("")
 	preEventHandler := func() {
-		p0.Refresh()
 		p1.Refresh()
 		p2.Refresh()
 		p3.Refresh()
+		p4.Refresh()
 		eventText.SetText(g.NextEvent.Question(g))
 		aiSelection.SetText(DEFAULT_AI_TEXT)
 
@@ -199,13 +200,13 @@ func makeMainUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 		layout.NewVBoxLayout(),
 		container.New(
 			layout.NewHBoxLayout(),
-			p0,
 			p1,
+			p2,
 		),
 		container.New(
 			layout.NewHBoxLayout(),
-			p2,
 			p3,
+			p4,
 		),
 	)
 
@@ -219,13 +220,179 @@ func makeMainUI(w fyne.Window, boardWdgt *boardWidget) fyne.CanvasObject {
 	return ui
 }
 
-func main() {
-	load_images()
+func makePlayerSelectEntry() *widget.Select {
+	return widget.NewSelect([]string{
+		"Mario", "Luigi", "Peach", "Yoshi", "Wario", "Donkey Kong",
+	}, nil)
+}
 
+func makeConfigScreen(canvas fyne.Canvas) fyne.CanvasObject {
+	p1 := makePlayerSelectEntry()
+	p2 := makePlayerSelectEntry()
+	p3 := makePlayerSelectEntry()
+	p4 := makePlayerSelectEntry()
+
+	p1.SetSelected("Mario")
+	p2.SetSelected("Luigi")
+	p3.SetSelected("Peach")
+	p4.SetSelected("Yoshi")
+
+	playerSelectors := container.New(
+		layout.NewVBoxLayout(),
+		container.New(
+			layout.NewHBoxLayout(),
+			widget.NewLabel("Player 1:"),
+			p1,
+		),
+		container.New(
+			layout.NewHBoxLayout(),
+			widget.NewLabel("Player 2:"),
+			p2,
+		),
+		container.New(
+			layout.NewHBoxLayout(),
+			widget.NewLabel("Player 3:"),
+			p3,
+		),
+		container.New(
+			layout.NewHBoxLayout(),
+			widget.NewLabel("Player 4:"),
+			p4,
+		),
+	)
+	boardSelector := widget.NewRadioGroup(
+		[]string{
+			"Mario's Rainbow Castle",
+			"DK's Jungle Adventure",
+			"Peach's Birthday Cake",
+			"Yoshi's Tropical Island",
+			"Wario's Battle Canyon",
+			"Luigi's Engine Room",
+			"Bowser's Magma Mountain",
+			"Eternal Star",
+		},
+		nil,
+	)
+	boardSelector.SetSelected("Mario's Rainbow Castle")
+
+	maxTurnsInput := widget.NewSelect([]string{"20", "35", "50"}, nil)
+	maxTurnsInput.SetSelected("20")
+
+	bonusStarsInput := widget.NewCheck("Bonus Stars", nil)
+	bonusStarsInput.SetChecked(true)
+
+	koopaInput := widget.NewCheck("Koopa on Board", nil)
+	koopaInput.SetChecked(true)
+
+	booInput := widget.NewCheck("Boo on Board", nil)
+	booInput.SetChecked(true)
+
+	redDiceInput := widget.NewCheck("Red Dice", nil)
+	redDiceInput.SetChecked(false)
+
+	blueDiceInput := widget.NewCheck("Blue Dice", nil)
+	blueDiceInput.SetChecked(false)
+
+	warpDiceInput := widget.NewCheck("Warp Dice", nil)
+	warpDiceInput.SetChecked(false)
+
+	eventsDiceInput := widget.NewCheck("Events Dice", nil)
+	eventsDiceInput.SetChecked(false)
+
+	gameConfigContainer := container.New(
+		layout.NewVBoxLayout(),
+		container.New(
+			layout.NewHBoxLayout(),
+			widget.NewLabel("Max Turns:"),
+			maxTurnsInput,
+		),
+		bonusStarsInput,
+		koopaInput,
+		booInput,
+		redDiceInput,
+		blueDiceInput,
+		warpDiceInput,
+		eventsDiceInput,
+	)
+
+	startGameButton := widget.NewButton("Start Game", func() {
+		var mp1BoardConfig boardConfig
+		switch boardSelector.Selected {
+		case "Mario's Rainbow Castle":
+			mp1BoardConfig = MRC
+		case "DK's Jungle Adventure":
+			mp1BoardConfig = DKJA
+		case "Peach's Birthday Cake":
+			mp1BoardConfig = PBC
+		case "Yoshi's Tropical Island":
+			mp1BoardConfig = YTI
+		case "Wario's Battle Canyon":
+			mp1BoardConfig = WBC
+		case "Luigi's Engine Room":
+			mp1BoardConfig = LER
+		case "Bowser's Magma Mountain":
+			mp1BoardConfig = BMM
+		case "Eternal Star":
+			mp1BoardConfig = ES
+		}
+
+		p1Conf := PlayerNameToConfig(p1.Selected)
+		p2Conf := PlayerNameToConfig(p2.Selected)
+		p3Conf := PlayerNameToConfig(p3.Selected)
+		p4Conf := PlayerNameToConfig(p4.Selected)
+
+		mp1Board := initImage(
+			mp1BoardConfig, p1Conf, p2Conf, p3Conf, p4Conf,
+		)
+
+		var maxTurns uint8
+		switch maxTurnsInput.Selected {
+		case "20":
+			maxTurns = 20
+		case "35":
+			maxTurns = 35
+		case "50":
+			maxTurns = 50
+		}
+
+		gc := mp1.GameConfig{
+			MaxTurns:     maxTurns,
+			NoBonusStars: bonusStarsInput.Checked,
+			NoKoopa:      koopaInput.Checked,
+			NoBoo:        booInput.Checked,
+			RedDice:      redDiceInput.Checked,
+			BlueDice:     blueDiceInput.Checked,
+			WarpDice:     warpDiceInput.Checked,
+			EventsDice:   eventsDiceInput.Checked,
+		}
+
+		canvas.SetContent(
+			makeMainUI(
+				mp1Board, gc, p1Conf, p2Conf, p3Conf, p4Conf,
+			),
+		)
+	})
+
+	ui := container.New(
+		layout.NewVBoxLayout(),
+		container.New(
+			layout.NewHBoxLayout(),
+			playerSelectors,
+			gameConfigContainer,
+		),
+		boardSelector,
+		startGameButton,
+	)
+
+	return ui
+}
+
+func main() {
 	uiApp := app.New()
 	window := uiApp.NewWindow("PartySim")
 
-	ui := makeMainUI(window, lerImage)
+	//ui := makeMainUI(lerImage)
+	ui := makeConfigScreen(window.Canvas())
 	window.SetContent(ui)
 	window.ShowAndRun()
 }

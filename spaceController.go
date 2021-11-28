@@ -1,7 +1,6 @@
 package main
 
 import (
-	"image/color"
 	"log"
 
 	"github.com/0xhexnumbers/partysim/mp1"
@@ -29,25 +28,6 @@ func (s SpaceControllerMode) String() string {
 	}
 	return ""
 }
-
-var (
-	scPlayer1Colors = spaceColor{
-		dorment:   color.NRGBA{0xc5, 0x88, 0x3a, 0xff},
-		highlight: color.NRGBA{0xe3, 0x83, 0x1c, 0xff},
-	}
-	scPlayer2Colors = spaceColor{
-		dorment:   color.NRGBA{0x3a, 0xc5, 0x43, 0xff},
-		highlight: color.NRGBA{0x1c, 0xe3, 0x20, 0xff},
-	}
-	scPlayer3Colors = spaceColor{
-		dorment:   color.NRGBA{0x3a, 0x77, 0xc5, 0xff},
-		highlight: color.NRGBA{0x1c, 0x7c, 0xe3, 0xff},
-	}
-	scPlayer4Colors = spaceColor{
-		dorment:   color.NRGBA{0xc5, 0x3a, 0xbc, 0xff},
-		highlight: color.NRGBA{0xe3, 0x1c, 0xdf, 0xff},
-	}
-)
 
 type SpaceController struct {
 	Mode               SpaceControllerMode

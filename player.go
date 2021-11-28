@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -11,6 +12,81 @@ import (
 	"github.com/0xhexnumbers/partysim/mp1"
 )
 
+type PlayerConfig struct {
+	Name  string
+	Color spaceColor
+}
+
+func PlayerNameToConfig(name string) PlayerConfig {
+	switch name {
+	case "Mario":
+		return MarioConfig
+	case "Luigi":
+		return LuigiConfig
+	case "Peach":
+		return PeachConfig
+	case "Yoshi":
+		return YoshiConfig
+	case "Wario":
+		return WarioConfig
+	case "Donkey Kong":
+		return DKConfig
+	}
+	return PlayerConfig{}
+}
+
+//PlayerConfig section
+//Player Color schemes made using https://www.canva.com/colors/color-wheel
+//using Monochromatic color combinations.
+
+var MarioConfig = PlayerConfig{
+	Name: "Mario",
+	Color: spaceColor{
+		highlight: color.NRGBA{0xf1, 0x41, 0x41, 0xff},
+		dorment:   color.NRGBA{0xee, 0x11, 0x11, 0xff},
+	},
+}
+
+var LuigiConfig = PlayerConfig{
+	Name: "Luigi",
+	Color: spaceColor{
+		highlight: color.NRGBA{0x47, 0x83, 0xeb, 0xff},
+		dorment:   color.NRGBA{0x19, 0x64, 0xe6, 0xff},
+	},
+}
+
+var PeachConfig = PlayerConfig{
+	Name: "Peach",
+	Color: spaceColor{
+		highlight: color.NRGBA{0xdb, 0x57, 0xc4, 0xff},
+		dorment:   color.NRGBA{0xd2, 0x2d, 0xb5, 0xff},
+	},
+}
+
+var YoshiConfig = PlayerConfig{
+	Name: "Yoshi",
+	Color: spaceColor{
+		highlight: color.NRGBA{0xf3, 0xef, 0x6d, 0xff},
+		dorment:   color.NRGBA{0x13, 0xec, 0x48, 0xff},
+	},
+}
+
+var WarioConfig = PlayerConfig{
+	Name: "Wario",
+	Color: spaceColor{
+		highlight: color.NRGBA{0xca, 0xe5, 0x4d, 0xff},
+		dorment:   color.NRGBA{0xbd, 0xdf, 0x20, 0xff},
+	},
+}
+
+var DKConfig = PlayerConfig{
+	Name: "Donkey Kong",
+	Color: spaceColor{
+		highlight: color.NRGBA{0xbc, 0x73, 0x14, 0xff},
+		dorment:   color.NRGBA{0x8e, 0x57, 0x0f, 0xff},
+	},
+}
+
 type Player struct {
 	widget.BaseWidget
 	g        *mp1.Game
@@ -19,23 +95,14 @@ type Player struct {
 	rect     *canvas.Rectangle
 }
 
-func NewPlayer(g *mp1.Game, pIdx int, sm SpaceCirc) *Player {
+func NewPlayer(g *mp1.Game, pIdx int, sm SpaceCirc, pc PlayerConfig) *Player {
 	p := &Player{
 		BaseWidget: widget.BaseWidget{},
 		g:          g,
 		pIdx:       pIdx,
 		spaceMap:   sm,
 	}
-	switch pIdx {
-	case 0:
-		p.rect = canvas.NewRectangle(scPlayer1Colors.dorment)
-	case 1:
-		p.rect = canvas.NewRectangle(scPlayer2Colors.dorment)
-	case 2:
-		p.rect = canvas.NewRectangle(scPlayer3Colors.dorment)
-	case 3:
-		p.rect = canvas.NewRectangle(scPlayer4Colors.dorment)
-	}
+	p.rect = canvas.NewRectangle(pc.Color.dorment)
 	p.ExtendBaseWidget(p)
 	return p
 }
