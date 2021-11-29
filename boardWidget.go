@@ -24,55 +24,79 @@ var (
 
 type boardConfig struct {
 	board    mp1.Board
-	filePath string
+	imgFile  ImageFile
 	spaceMap SpaceCirc
 }
 
 var YTI = boardConfig{
-	board:    board.YTI,
-	filePath: "./img/YoshisTropicalIsland.png",
+	board: board.YTI,
+	imgFile: ImageFile{
+		boardName: "YTI",
+		filePath:  "img/YoshisTropicalIsland.png",
+	},
 	spaceMap: ytiSpaceToPos,
 }
 
 var DKJA = boardConfig{
-	board:    board.DKJA,
-	filePath: "./img/DKsJungleAdventure.png",
+	board: board.DKJA,
+	imgFile: ImageFile{
+		boardName: "DKJA",
+		filePath:  "img/DKsJungleAdventure.png",
+	},
 	spaceMap: dkjaSpaceToPos,
 }
 
 var PBC = boardConfig{
-	board:    board.PBC,
-	filePath: "./img/PeachsBirthdayCake.png",
+	board: board.PBC,
+	imgFile: ImageFile{
+		boardName: "PBC",
+		filePath:  "img/PeachsBirthdayCake.png",
+	},
 	spaceMap: pbcSpaceToPos,
 }
 
 var WBC = boardConfig{
-	board:    board.WBC,
-	filePath: "./img/WariosBattleCanyon.png",
+	board: board.WBC,
+	imgFile: ImageFile{
+		boardName: "WBC",
+		filePath:  "img/WariosBattleCanyon.png",
+	},
 	spaceMap: wbcSpaceToPos,
 }
 
 var LER = boardConfig{
-	board:    board.LER,
-	filePath: "./img/LuigisEngineRoom.png",
+	board: board.LER,
+	imgFile: ImageFile{
+		boardName: "LER",
+		filePath:  "img/LuigisEngineRoom.png",
+	},
 	spaceMap: lerSpaceToPos,
 }
 
 var MRC = boardConfig{
-	board:    board.MRC,
-	filePath: "./img/MariosRainbowCastle.png",
+	board: board.MRC,
+	imgFile: ImageFile{
+		boardName: "MRC",
+		filePath:  "img/MariosRainbowCastle.png",
+	},
 	spaceMap: mrcSpaceToPos,
 }
 
 var BMM = boardConfig{
-	board:    board.BMM,
-	filePath: "./img/BowsersMagmaMountain.png",
+	board: board.BMM,
+	imgFile: ImageFile{
+		boardName: "BMM",
+		filePath:  "img/BowsersMagmaMountain.png",
+	},
 	spaceMap: bmmSpaceToPos,
 }
 
 var ES = boardConfig{
-	board:    board.ES,
-	filePath: "./img/EternalStar.png",
+	board: board.ES,
+	imgFile: ImageFile{
+		boardName: "ES",
+		filePath:  "img/EternalStar.png",
+	},
 	spaceMap: esSpaceToPos,
 }
 
@@ -138,12 +162,8 @@ func (i boardRenderer) Refresh() {
 	i.img.circles.Refresh()
 }
 
-func loadImage(filePath string) (img *canvas.Image, err error) {
-	var r fyne.Resource
-	r, err = fyne.LoadResourceFromPath(filePath)
-	if err != nil {
-		return
-	}
+func loadImage(file ImageFile) (img *canvas.Image, err error) {
+	r := file.LoadResource()
 	img = canvas.NewImageFromResource(r)
 	img.FillMode = canvas.ImageFillContain
 	return
@@ -154,7 +174,7 @@ func initImage(conf boardConfig,
 	var err error
 	boardWdgt := &boardWidget{}
 	boardWdgt.board = conf.board
-	boardWdgt.image, err = loadImage(conf.filePath)
+	boardWdgt.image, err = loadImage(conf.imgFile)
 	if err != nil {
 		panic(fmt.Errorf("Cannot load image: %w", err.Error()))
 	}
