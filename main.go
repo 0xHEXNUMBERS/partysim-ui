@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/0xhexnumbers/partysim/mp1"
 )
@@ -411,9 +412,23 @@ func makeConfigScreen(canvas fyne.Canvas) fyne.CanvasObject {
 
 func main() {
 	uiApp := app.New()
-	window := uiApp.NewWindow("PartySim")
+	uiApp.Settings().SetTheme(theme.DarkTheme())
 
-	//ui := makeMainUI(lerImage)
+	window := uiApp.NewWindow("PartySim")
+	mainMenu := fyne.NewMainMenu(
+		fyne.NewMenu("File"),
+		fyne.NewMenu(
+			"Themes",
+			fyne.NewMenuItem("Dark Theme", func() {
+				uiApp.Settings().SetTheme(theme.DarkTheme())
+			}),
+			fyne.NewMenuItem("Light Theme", func() {
+				uiApp.Settings().SetTheme(theme.LightTheme())
+			}),
+		),
+	)
+	window.SetMainMenu(mainMenu)
+
 	ui := makeConfigScreen(window.Canvas())
 	window.SetContent(ui)
 	window.ShowAndRun()
