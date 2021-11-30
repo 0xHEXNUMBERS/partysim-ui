@@ -379,9 +379,9 @@ func makeConfigScreen(canvas fyne.Canvas) fyne.CanvasObject {
 
 		gc := mp1.GameConfig{
 			MaxTurns:     uint8(maxTurns),
-			NoBonusStars: bonusStarsInput.Checked,
-			NoKoopa:      koopaInput.Checked,
-			NoBoo:        booInput.Checked,
+			NoBonusStars: !bonusStarsInput.Checked,
+			NoKoopa:      !koopaInput.Checked,
+			NoBoo:        !booInput.Checked,
 			RedDice:      redDiceInput.Checked,
 			BlueDice:     blueDiceInput.Checked,
 			WarpDice:     warpDiceInput.Checked,
