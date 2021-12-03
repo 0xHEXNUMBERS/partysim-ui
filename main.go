@@ -411,7 +411,7 @@ func makeConfigScreen(canvas fyne.Canvas) fyne.CanvasObject {
 }
 
 func main() {
-	uiApp := app.New()
+	uiApp := app.NewWithID("me.hexnumbers.partysim")
 	uiApp.Settings().SetTheme(theme.DarkTheme())
 
 	window := uiApp.NewWindow("PartySim")
