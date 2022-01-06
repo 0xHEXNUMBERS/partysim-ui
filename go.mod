@@ -5,7 +5,7 @@ go 1.17
 require (
 	fyne.io/fyne/v2 v2.1.1
 	github.com/0xhexnumbers/gmcts/v2 v2.0.0
-	github.com/0xhexnumbers/partysim v0.0.3
+	github.com/0xhexnumbers/partysim v0.0.4
 )
 
 require (
